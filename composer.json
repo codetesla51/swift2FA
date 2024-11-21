@@ -1,0 +1,23 @@
+{
+    "name": "u0_a234/swiift2fa",
+    "description": "a 2fa library",
+    "type": "library",
+    "require": {
+        "vlucas/phpdotenv": "5.6.x-dev",
+        "endroid/qr-code": "^6.0@dev",
+        "chillerlan/php-qrcode": "dev-main",
+        "paragonie/constant_time_encoding": "dev-master"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "U0A234\\Swiift2fa\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "uthman dev"
+        }
+    ],
+    "minimum-stability": "dev"
+}
