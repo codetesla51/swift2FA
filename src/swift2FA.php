@@ -1,4 +1,10 @@
 <?php
+declare(strict_types=1);
+namespace S2FA;
+require "../config.php";
+use ParagonIE\ConstantTime\Encoding;
+use chillerlan\QRCode\{QRCode, QROptions};
+use S2FA\DB;
 /**
  * Swift2FA - PHP Library for Two-Factor Authentication (TFA) with QR Code Generation
  *
@@ -50,11 +56,8 @@
  *   License: https://opensource.org/licenses/MIT
  *   Repository: https://github.com/PHPMailer/PHPMailer
  */
-require "../config.php";
-require "DB.php";
-use ParagonIE\ConstantTime\Encoding;
-use chillerlan\QRCode\{QRCode, QROptions};
-class S2FA extends DB
+
+class S2FA
 {
   private string $secretKey;
   private string $encryptionKey;
@@ -204,13 +207,11 @@ class S2FA extends DB
   {
     // Encrypt the user secret
     $encryptedKey = $this->encryptKey();
-
-    // Create a database connection
-    $dbCreate = new DB();
-    $checkConnection = $dbCreate->connect();
+    $db = DB::getInstance(); // Access the singleton instance
+    $connection = $db->connect();
 
     // Check if the database connection is successful
-    if (!$checkConnection) {
+    if (!$connection) {
       throw new \RuntimeException(
         "Could not retrieve user secret: Database connection error."
       );
@@ -218,7 +219,7 @@ class S2FA extends DB
 
     // Prepare the SQL query with placeholders for the table and column names
     $sql = "INSERT INTO `$table` (`$column`) VALUES (?)";
-    $stmt = $checkConnection->prepare($sql);
+    $stmt = $connection->prepare($sql);
 
     if ($stmt) {
       // Execute the query with the encrypted user secret as a parameter
@@ -243,11 +244,10 @@ class S2FA extends DB
    */
   public function getUserSecret(int $userId): ?array
   {
-    // Create a database connection
-    $dbCreate = new DB();
-    $checkConnection = $dbCreate->connect();
+    $db = DB::getInstance(); // Access the singleton instance
+    $connection = $db->connect();
     // Check if the database connection is successful
-    if (!$checkConnection) {
+    if (!$connection) {
       throw new \RuntimeException(
         "Could not retrieve user secret: Database connection error."
       );
@@ -255,7 +255,7 @@ class S2FA extends DB
 
     // Prepare the SQL query to fetch the user secret based on user ID
     $sql = "SELECT user_secret FROM users WHERE user_id = ?";
-    $stmt = $checkConnection->prepare($sql);
+    $stmt = $connection->prepare($sql);
 
     if (!$stmt) {
       throw new \RuntimeException("Statement preparation failed.");
@@ -341,3 +341,4 @@ $email = "uol";
 $s2fa = new S2FA();
 $qrCodeData = $s2fa->generateQR($userId, $email);
 echo $qrCodeData;
+    
