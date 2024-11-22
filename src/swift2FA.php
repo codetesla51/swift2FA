@@ -255,53 +255,53 @@ class S2FA
    * @return array|null Returns an array with the decrypted user secret, or null if not found.
    * @throws \RuntimeException If there is an issue with the database connection, query execution, or decryption.
    */
-  public function getUserSecret(int $userId): ?array
-  {
+  public function getUserSecret(int $userId, string $table = 'users', string $column = 'user_secret'): ?array
+{
     $db = DB::getInstance();
     $connection = $db->connect();
+
     // Check if the database connection is successful
     if (!$connection) {
-      throw new \RuntimeException(
-        "Failed to retrieve user secret. User ID not found: " . $userId
-      );
+        throw new \RuntimeException("Failed to retrieve user secret. User ID not found: " . $userId);
     }
 
-    // Prepare the SQL query to fetch the user secret based on user ID
-    $sql = "SELECT user_secret FROM users WHERE user_id = ?";
+    // Prepare the SQL query to fetch the user secret based on user ID and dynamic table/column
+    $sql = "SELECT $column FROM $table WHERE user_id = ?";
     $stmt = $connection->prepare($sql);
 
     if (!$stmt) {
-      throw new \RuntimeException(
-        "Query preparation failed. SQL: '" .
-          $sql .
-          "' - Error: " .
-          $e->getMessage()
-      );
+        throw new \RuntimeException(
+            "Query preparation failed. SQL: '" .
+            $sql .
+            "' - Error: " .
+            $e->getMessage()
+        );
     }
 
     // Execute the query with the user ID as a parameter
     $run = $stmt->execute([$userId]);
     if ($run) {
-      // Fetch the result
-      $userSecret = $stmt->fetch();
-      if ($userSecret && isset($userSecret["user_secret"])) {
-        // Decrypt the user secret
-        $decryptedSecret = $this->decryptKey($userSecret["user_secret"]);
+        // Fetch the result
+        $userSecret = $stmt->fetch();
+        if ($userSecret && isset($userSecret[$column])) {
+            // Decrypt the user secret
+            $decryptedSecret = $this->decryptKey($userSecret[$column]);
 
-        // Check if decryption was successful
-        if ($decryptedSecret === false) {
-          throw new \RuntimeException(
-            "Decryption failed. The provided data may be corrupted or the decryption key is incorrect."
-          );
+            // Check if decryption was successful
+            if ($decryptedSecret === false) {
+                throw new \RuntimeException(
+                    "Decryption failed. The provided data may be corrupted or the decryption key is incorrect."
+                );
+            }
+
+            // Return the decrypted secret
+            return [$column => $decryptedSecret];
         }
-
-        // Return the decrypted secret
-        return ["user_secret" => $decryptedSecret];
-      }
     }
 
     return null; // Return null if no result was found or execution fails
-  }
+}
+
 
   /**
    * Generate a QR Code for user authentication.
