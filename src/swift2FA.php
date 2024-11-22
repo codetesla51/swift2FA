@@ -1,4 +1,55 @@
 <?php
+/**
+ * Swift2FA - PHP Library for Two-Factor Authentication (TFA) with QR Code Generation
+ *
+ * @author   Uthman Oladele | Uthman Dev
+ * @license  MIT License
+ * @version  1.0.0
+ * This library provides easy-to-use methods for generating QR codes for Two-Factor Authentication (2FA)
+ * using the TOTP (Time-based One-Time Password) algorithm. It integrates seamlessly with user systems
+ * for 2FA authentication setup.
+ *
+ * LICENSE:
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2024 Uthman Oladele
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+ * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Repository:
+ * https://github.com/codetesla52/swift2FA
+ *
+ * Contact:
+ * Email: uoladele@gmail.com
+ * Website: https://dev-uthman.vercel.app
+ *
+ * External Libraries Used:
+ * - ParagonIE\ConstantTime\Encoding: A library providing constant-time encoding functions.
+ *   License: https://opensource.org/licenses/MIT
+ *   Repository: https://github.com/paragonie/constant_time_encoding
+ *
+ * - chillerlan\QRCode: A library for generating QR codes.
+ *   License: https://opensource.org/licenses/MIT
+ *   Repository: https://github.com/chillerlan/php-qrcode
+ *
+ * - vlucas/phpdotenv: A library for loading environment variables from `.env` files.
+ *   License: https://opensource.org/licenses/MIT
+ *   Repository: https://github.com/vlucas/phpdotenv
+ *
+ * - PHPMailer/PHPMailer: A full-featured email creation and transfer class for PHP.
+ *   License: https://opensource.org/licenses/MIT
+ *   Repository: https://github.com/PHPMailer/PHPMailer
+ */
 require "../config.php";
 require "DB.php";
 use ParagonIE\ConstantTime\Encoding;
