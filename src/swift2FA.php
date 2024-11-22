@@ -75,8 +75,8 @@ class S2FA
   {
     // Ensure secret key is set or generate one if not provided
     if ($secretKey === null) {
-      $data = random_bytes(32); // Generate 32 random bytes
-      $this->secretKey = Encoding::base32Encode($data); // Encode it to base32 format
+      $data = random_bytes(32);
+      $this->secretKey = Encoding::base32Encode($data);
     } else {
       $this->secretKey = $secretKey; // Use the provided secret key
     }
@@ -90,7 +90,10 @@ class S2FA
       );
     }
   }
-
+  public function GetSecreteKey(): string
+  {
+    return $this->secretKey;
+  }
   /**
    * Generate a secure OTP using the current time and the secret key.
    *
@@ -100,19 +103,10 @@ class S2FA
    * @throws Exception If the user secret cannot be retrieved.
    */
   public function generateTOTP(
-    int $userId,
-    $timeStep = 30,
+    string $secret,
+    int $timeStep = 30,
     int $codeLength = 6
   ): string {
-    // Get the secret from the GetUserSecret method
-    $secretArray = $this->GetUserSecret($userId);
-    if ($secretArray && isset($secretArray["user_secret"])) {
-      $secret = $secretArray["user_secret"];
-    } else {
-      throw new \RuntimeException(
-        "Failed to retrieve user secret. User ID not found: " . $userId
-      );
-    }
     $decode_secret = Encoding::base32Decode($secret);
     // Compute the current time step
     $timestamp = floor(time() / $timeStep);
@@ -206,129 +200,18 @@ class S2FA
   }
 
   /**
-   * Inserts an encrypted key into a specified database table and column.
    *
-   * @param string $table The table name where the data will be inserted.
-   * @param string $column The column name where the user secret will be inserted.
-   * @return bool Returns true if the secret was added successfully, false otherwise.
-   * @throws \RuntimeException If there is an issue with the database connection or query preparation.
-   */
-  public function insertSecretToDb(string $table, string $column): bool
-  {
-    // Encrypt the user secret
-    $encryptedKey = $this->encryptKey();
-    $db = DB::getInstance();
-    $connection = $db->connect();
-    // Check if the database connection is successful
-    if (!$connection) {
-      throw new \RuntimeException(
-        "Could not retrieve user secret: Database connection error."
-      );
-    }
-    // Prepare the SQL query with placeholders for the table and column names
-    $sql = "INSERT INTO `$table` (`$column`) VALUES (?)";
-    $stmt = $connection->prepare($sql);
-
-    if ($stmt) {
-      // Execute the query with the encrypted user secret as a parameter
-      $run = $stmt->execute([$encryptedKey]);
-
-      if ($run) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      throw new \RuntimeException(
-        "Query preparation failed. SQL: '" .
-          $sql .
-          "' - Error: " .
-          $e->getMessage()
-      );
-    }
-  }
-
-  /**
-   * Retrieves and decrypts the user secret for a given user ID.
-   *
-   * @param int $userId The ID of the user whose secret is to be retrieved.
-   * @return array|null Returns an array with the decrypted user secret, or null if not found.
-   * @throws \RuntimeException If there is an issue with the database connection, query execution, or decryption.
-   */
-  public function getUserSecret(int $userId, string $table = 'users', string $column = 'user_secret'): ?array
-{
-    $db = DB::getInstance();
-    $connection = $db->connect();
-
-    // Check if the database connection is successful
-    if (!$connection) {
-        throw new \RuntimeException("Failed to retrieve user secret. User ID not found: " . $userId);
-    }
-
-    // Prepare the SQL query to fetch the user secret based on user ID and dynamic table/column
-    $sql = "SELECT $column FROM $table WHERE user_id = ?";
-    $stmt = $connection->prepare($sql);
-
-    if (!$stmt) {
-        throw new \RuntimeException(
-            "Query preparation failed. SQL: '" .
-            $sql .
-            "' - Error: " .
-            $e->getMessage()
-        );
-    }
-
-    // Execute the query with the user ID as a parameter
-    $run = $stmt->execute([$userId]);
-    if ($run) {
-        // Fetch the result
-        $userSecret = $stmt->fetch();
-        if ($userSecret && isset($userSecret[$column])) {
-            // Decrypt the user secret
-            $decryptedSecret = $this->decryptKey($userSecret[$column]);
-
-            // Check if decryption was successful
-            if ($decryptedSecret === false) {
-                throw new \RuntimeException(
-                    "Decryption failed. The provided data may be corrupted or the decryption key is incorrect."
-                );
-            }
-
-            // Return the decrypted secret
-            return [$column => $decryptedSecret];
-        }
-    }
-
-    return null; // Return null if no result was found or execution fails
-}
-
-
-  /**
    * Generate a QR Code for user authentication.
    *
-   * @param string $email The user's email address.
    * @param string|null $userSecret Optional user secret. If not provided, it will be fetched from the database.
    * @return string Returns the QR code image source (URL or base64) to be rendered in HTML.
    * @throws \RuntimeException If the user secret cannot be retrieved or QR code generation fails.
    */
-  public function generateQR(
-    int $userId,
-    string $email,
-    string $userSecret = null
-  ): string {
+  public function generateQR(string $email, string $secret = null): string
+  {
     // Use environment variables for app-specific information
     $APP_NAME = $_ENV["APP_NAME"];
-
-    // If the user secret isn't provided, fetch it from the database
-    if (!$userSecret) {
-      $secretArray = $this->GetUserSecret($userId);
-      if ($secretArray && isset($secretArray["user_secret"])) {
-        $userSecret = $secretArray["user_secret"];
-      } else {
-        throw new \RuntimeException("Failed to retrieve user secret.");
-      }
-    }
-    $data = "otpauth://totp/{$APP_NAME}:{$email}?secret={$userSecret}&issuer={$APP_NAME}";
+    $data = "otpauth://totp/{$APP_NAME}:{$email}?secret={$secret}&issuer={$APP_NAME}";
     $options = new QROptions([
       "version" => 10,
       "scale" => 10,
@@ -557,10 +440,8 @@ class S2FA
   }
 }
 $s2fa = new S2FA();
-$s2fa->Mail(
-  "SMTP",
-  "user@example.com",
-  "Hello World",
-  "John Doe",
-  "Subject of the Email"
-);
+$email = "uola";
+$secret = "irlz3gzaeqzwke6pnhke6ceztquqzca6axujy4bbafzcn3t22hyq====";
+var_dump($s2fa->generateQR($email, $secret));
+var_dump($s2fa->generateTOTP($secret));
+var_dump($s2fa->GetSecreteKey());
