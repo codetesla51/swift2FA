@@ -4,7 +4,10 @@ namespace S2FA;
 require "../config.php";
 use ParagonIE\ConstantTime\Encoding;
 use chillerlan\QRCode\{QRCode, QROptions};
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 use S2FA\DB;
+
 /**
  * Swift2FA - PHP Library for Two-Factor Authentication (TFA) with QR Code Generation
  *
@@ -106,7 +109,9 @@ class S2FA
     if ($secretArray && isset($secretArray["user_secret"])) {
       $secret = $secretArray["user_secret"];
     } else {
-      throw new Exception("Failed to retrieve user secret.");
+      throw new \RuntimeException(
+        "Failed to retrieve user secret. User ID not found: " . $userId
+      );
     }
     $decode_secret = Encoding::base32Decode($secret);
     // Compute the current time step
@@ -153,7 +158,10 @@ class S2FA
 
     $encryptedData = base64_encode($encryptedSecret . "::" . $iv);
     if ($encryptedSecret == false) {
-      throw new \RuntimeException("Encryption failed.");
+      throw new \RuntimeException(
+        "Encryption failed for secret key.
+           - Possible causes: invalid key, unsupported encryption method."
+      );
     }
     return $encryptedData;
   }
@@ -188,7 +196,9 @@ class S2FA
 
     // Check if decryption was successful
     if ($decrypted === false) {
-      throw new \RuntimeException("Decryption failed.");
+      throw new \RuntimeException(
+        "Decryption failed. The provided data may be corrupted or the decryption key is incorrect."
+      );
     }
 
     // Return the decrypted secret
@@ -207,16 +217,14 @@ class S2FA
   {
     // Encrypt the user secret
     $encryptedKey = $this->encryptKey();
-    $db = DB::getInstance(); // Access the singleton instance
+    $db = DB::getInstance();
     $connection = $db->connect();
-
     // Check if the database connection is successful
     if (!$connection) {
       throw new \RuntimeException(
         "Could not retrieve user secret: Database connection error."
       );
     }
-
     // Prepare the SQL query with placeholders for the table and column names
     $sql = "INSERT INTO `$table` (`$column`) VALUES (?)";
     $stmt = $connection->prepare($sql);
@@ -231,7 +239,12 @@ class S2FA
         return false;
       }
     } else {
-      throw new \RuntimeException("Query preparation failed.");
+      throw new \RuntimeException(
+        "Query preparation failed. SQL: '" .
+          $sql .
+          "' - Error: " .
+          $e->getMessage()
+      );
     }
   }
 
@@ -244,12 +257,12 @@ class S2FA
    */
   public function getUserSecret(int $userId): ?array
   {
-    $db = DB::getInstance(); // Access the singleton instance
+    $db = DB::getInstance();
     $connection = $db->connect();
     // Check if the database connection is successful
     if (!$connection) {
       throw new \RuntimeException(
-        "Could not retrieve user secret: Database connection error."
+        "Failed to retrieve user secret. User ID not found: " . $userId
       );
     }
 
@@ -258,7 +271,12 @@ class S2FA
     $stmt = $connection->prepare($sql);
 
     if (!$stmt) {
-      throw new \RuntimeException("Statement preparation failed.");
+      throw new \RuntimeException(
+        "Query preparation failed. SQL: '" .
+          $sql .
+          "' - Error: " .
+          $e->getMessage()
+      );
     }
 
     // Execute the query with the user ID as a parameter
@@ -272,7 +290,9 @@ class S2FA
 
         // Check if decryption was successful
         if ($decryptedSecret === false) {
-          throw new \RuntimeException("Decryption failed.");
+          throw new \RuntimeException(
+            "Decryption failed. The provided data may be corrupted or the decryption key is incorrect."
+          );
         }
 
         // Return the decrypted secret
@@ -330,15 +350,217 @@ class S2FA
    * @param string $input The input code to verify.
    * @return bool True if the input matches the generated OTP, false otherwise.
    */
-  public function s2faVerify(string $input): bool
+  public function TOTPVerify(string $input, int $userID): bool
   {
-    $TOTP = $this->generateOTP();
+    $TOTP = $this->generateTOTP($userID);
+    return $input === $TOTP;
+  }
+
+  /**
+   * Configure PHPMailer and SMTP
+   *
+   * @param string $email User's email
+   * @param string $name User's name
+   * @param string $subject Mail subject | Optional
+   * @param string $message Email message
+   * @return bool true | false
+   */
+
+  private function PHPMailerSetup(
+    string $email,
+    string $message,
+    string $name,
+    string $subject = null
+  ): bool {
+    try {
+      $mail = new PHPMailer(true);
+      $mail->isSMTP();
+      $mail->Host = $_ENV["HOST"];
+      $mail->SMTPAuth = true;
+      $mail->Username = $_ENV["USER_NAME"];
+      $mail->Password = $_ENV["PASSWORD"];
+      $mail->Port = $_ENV["PORT"];
+      $mail->SMTPSecure = $_ENV["SMTP_SECURE"];
+      $mail->isHTML(true);
+      $mail->setFrom($email, $name);
+      $mail->addAddress($email, $name);
+
+      if ($subject) {
+        $mail->Subject = $subject;
+      }
+
+      $mail->Body = $message;
+      $mail->send();
+      return true;
+    } catch (Exception $e) {
+      throw new \RuntimeException("PHPMailer Error: " . $mail->ErrorInfo);
+    }
+  }
+
+  /**
+   * Send TOTP to email using PHPMailer via SMTP
+   *
+   * @param string $email User's email
+   * @param string $name User's name
+   * @param string $subject Mail subject | Optional
+   * @param string $message Email message
+   * @return bool true | false
+   */
+
+  public function PHPMailer(
+    string $email,
+    string $message,
+    string $name,
+    string $subject = null
+  ): bool {
+    try {
+      return $this->PHPMailerSetup($email, $message, $name, $subject);
+    } catch (\Exception $e) {
+      throw new \RuntimeException("Error sending email: " . $e->getMessage());
+    }
+  }
+
+  /**
+   * Configure SendGrid
+   *
+   * @param string $email User's email
+   * @param string $name User's name
+   * @param string $subject Mail subject | Optional
+   * @param string $message Email message
+   * @return bool true | false
+   */
+  private function SendGridSetup(
+    string $email,
+    string $message,
+    string $name,
+    string $subject = null
+  ): bool {
+    try {
+      $sendgridApiKey = $_ENV["SENDGRID_API_KEY"];
+      $sendgrid = new \SendGrid($sendgridApiKey);
+
+      $emailContent = new \SendGrid\Mail\Mail();
+      $emailContent->setFrom($email, $name);
+      $emailContent->setSubject($subject ? $subject : "No Subject");
+      $emailContent->addTo($email, $name);
+      $emailContent->addContent("text/html", $message);
+
+      // Send the email
+      $response = $sendgrid->send($emailContent);
+
+      if ($response->statusCode() == 202) {
+        // Email sent successfully
+        return true;
+      } else {
+        throw new \RuntimeException("SendGrid Error: " . $response->body());
+      }
+    } catch (\Exception $e) {
+      throw new \RuntimeException("SendGrid Error: " . $e->getMessage());
+    }
+  }
+
+  /**
+   * Send TOTP to email using SendGrid
+   *
+   * @param string $email User's email
+   * @param string $name User's name
+   * @param string $subject Mail subject | Optional
+   * @param string $message Email message
+   * @return bool true | false
+   */
+  public function SendGridMail(
+    string $email,
+    string $message,
+    string $name,
+    string $subject = null
+  ): bool {
+    try {
+      return $this->sendgridSetup($email, $message, $name, $subject);
+    } catch (\Exception $e) {
+      throw new \RuntimeException("Error sending email: " . $e->getMessage());
+    }
+  }
+
+  /**
+   * Configure Twilio SMS
+   * @param string $phoneNumber User's phoneNumber
+   * @param string $message SMS message
+   * @param string $name User name
+   * 
+?   * @return bool true | false
+   */
+  private function twilioSetup(
+    string $phoneNumber,
+    string $message,
+    string $name
+  ): bool {
+    try {
+      $sid = $_ENV["TWILIO_SID"];
+      $token = $_ENV["TWILIO_AUTH_TOKEN"];
+      $twilioPhoneNumber = $_ENV["TWILIO_PHONE_NUMBER"];
+      $twilio = new \Twilio\Rest\Client($sid, $token);
+      $message = $twilio->messages->create($phoneNumber, [
+        "from" => $twilioPhoneNumber,
+        "body" => $message,
+      ]);
+
+      if ($message->sid) {
+        return true;
+      } else {
+        throw new \RuntimeException("Failed to send SMS");
+      }
+    } catch (\Exception $e) {
+      throw new \RuntimeException("Twilio Error: " . $e->getMessage());
+    }
+  }
+
+  /**
+   * Send an email based on the specified mail service.
+   *
+   * @param string $mailType The email service to use ("SMTP" or "SendGrid").
+   * @param string $email The recipient's email address.
+   * @param string $message The body content of the email.
+   * @param string $name The name of the sender.
+   * @param string|null $subject The subject of the email (optional).
+   *
+   * @return bool true if the email was sent successfully, false otherwise.
+   * @throws \InvalidArgumentException if an invalid mail type is provided.
+   */
+  public function Mail(
+    string $mailType,
+    string $email,
+    string $message,
+    string $name,
+    string $subject = null
+  ): bool {
+    $types = ["SMTP", "SendGrid"];
+    if (in_array($mailType, $types)) {
+      if ($mailType == "SendGrid") {
+        return $this->SendGridMail($email, $message, $name, $subject);
+      } elseif ($mailType == "SMTP") {
+        return $this->PHPMailer($email, $message, $name, $subject);
+      }
+    }
+    throw new \InvalidArgumentException("Invalid mail type: " . $mailType);
+  }
+
+  /**
+   * Verify the code from Email
+   *
+   * @param string $input The input code to verify.
+   * @return bool True if the input matches the generated OTP, false otherwise.
+   */
+  public function TOTPEmailVerify(string $input, int $userID): bool
+  {
+    $TOTP = $this->generateTOTP($userID, $timeStep = 120);
     return $input === $TOTP;
   }
 }
-$userId = 14;
-$email = "uol";
 $s2fa = new S2FA();
-$qrCodeData = $s2fa->generateQR($userId, $email);
-echo $qrCodeData;
-    
+$s2fa->Mail(
+  "SMTP",
+  "user@example.com",
+  "Hello World",
+  "John Doe",
+  "Subject of the Email"
+);
