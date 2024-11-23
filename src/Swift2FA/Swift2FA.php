@@ -52,7 +52,6 @@
  */
 declare(strict_types=1);
 namespace Swift2FA;
-
 use ParagonIE\ConstantTime\Encoding;
 use chillerlan\QRCode\{QRCode, QROptions};
 use PHPMailer\PHPMailer\PHPMailer;
@@ -221,7 +220,7 @@ class Swift2FA
         "QR Code generation failed: " . $e->getMessage()
       );
     }
-    return sprintf('<img src="%s" alt="QR Code">', $qrcode);
+    return sprintf('<img src="%s" class="qrcode-image" alt="QR Code">', $qrcode);
   }
 
   /**

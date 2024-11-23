@@ -1,0 +1,147 @@
+.welcome .qrcon, .welcome .butns, .form .message, .form, body {
+  display: flex;
+  align-items: center;
+}
+
+* {
+  color: #fff;
+  transition: 0.3s all ease;
+  text-decoration: none;
+  font-family: "Kanit", Sans-Serif;
+}
+
+body {
+  background: #0a0a0a;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.form {
+  border: 2px solid #595252;
+  width: 440px;
+  background: #0a0a0a;
+  justify-content: center;
+  flex-direction: column;
+  border-radius: 10px;
+}
+
+.form button {
+  width: 120px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: #1de760;
+}
+
+.form button:hover {
+  background: #1db954;
+  transform: scale(0.5);
+}
+
+.form input {
+  width: 300px;
+  margin-top: 1.6em;
+  border-radius: 10px;
+  height: 45px;
+  margin-bottom: 1em;
+  font-size: 1em;
+  border: 2px solid #595252;
+  padding: 0 60px 0 30px;
+  background: #0a0a0a;
+  color: #1de760;
+}
+
+.form input::placeholder {
+  font-size: 1.3em;
+  text-transform: capitalize;
+}
+
+.form label {
+  float: right;
+  margin-top: 1em;
+}
+
+.form header {
+  font-size: 2em;
+  padding: 1em 1em;
+}
+
+.form .link {
+  margin: 1em 1em;
+  color: #1de760;
+}
+
+.form .message {
+  justify-content: space-between;
+  padding: 1em 1em;
+  border-radius: 10px;
+  margin: 1em 1em;
+  font-size: 1.2em;
+  width: 80%;
+}
+
+.form .error {
+  background: #ffa8a8b1;
+  color: #fc1700b1;
+}
+
+.form .success {
+  background: #c7ffa8b1;
+  color: #00de1e;
+}
+
+button {
+  width: 120px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: #1de760;
+}
+
+button:hover {
+  background: #1db954;
+  transform: scale(0.5);
+}
+
+.welcome {
+  width: 100%;
+  text-align: center;
+}
+
+.welcome h1 {
+  font-size: 2em;
+}
+
+.welcome h5 {
+  font-size: 1.6em;
+}
+
+.welcome .butns {
+  justify-content: center;
+  gap: 1em;
+}
+
+.welcome .butns button {
+  width: 150px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: #1de760;
+}
+
+.welcome .butns button:hover {
+  background: #1db954;
+  transform: scale(0.5);
+}
+
+.welcome .qrcon {
+  background: #0a0a0a;
+  border: 2px solid #595252;
+  padding: 1em 1em;
+  border-radius: 10px;
+  justify-content: center;
+}
+
+.welcome .qrcode-image {
+  width: 350px;
+}
