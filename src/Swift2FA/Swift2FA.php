@@ -1,13 +1,4 @@
 <?php
-declare(strict_types=1);
-namespace S2FA;
-require "../config.php";
-use ParagonIE\ConstantTime\Encoding;
-use chillerlan\QRCode\{QRCode, QROptions};
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-use S2FA\DB;
-
 /**
  * Swift2FA - PHP Library for Two-Factor Authentication (TFA) with QR Code Generation
  *
@@ -59,8 +50,14 @@ use S2FA\DB;
  *   License: https://opensource.org/licenses/MIT
  *   Repository: https://github.com/PHPMailer/PHPMailer
  */
+declare(strict_types=1);
+namespace Swift2FA;
 
-class S2FA
+use ParagonIE\ConstantTime\Encoding;
+use chillerlan\QRCode\{QRCode, QROptions};
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+class Swift2FA
 {
   private string $secretKey;
   private string $encryptionKey;
@@ -71,7 +68,7 @@ class S2FA
    * @param string|null $secretKey Optional secret key. If not provided, a random key will be generated.
    * @param int $codeLength Length of the OTP (default: 6).
    */
-  public function __construct(?string $secretKey = null, int $codeLength = 6)
+  public function __construct(?string $secretKey = null)
   {
     // Ensure secret key is set or generate one if not provided
     if ($secretKey === null) {
@@ -439,9 +436,3 @@ class S2FA
     return $input === $TOTP;
   }
 }
-$s2fa = new S2FA();
-$email = "uola";
-$secret = "irlz3gzaeqzwke6pnhke6ceztquqzca6axujy4bbafzcn3t22hyq====";
-var_dump($s2fa->generateQR($email, $secret));
-var_dump($s2fa->generateTOTP($secret));
-var_dump($s2fa->GetSecreteKey());

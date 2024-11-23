@@ -1,10 +1,5 @@
 <?php
-namespace S2FA;
-
-use PDO;
-use PDOException;
-
-require "../config.php";
+require "../../config.php";
 
 /**
  * Handles database connection using PDO.
@@ -16,31 +11,17 @@ class DB
   private string $DB_PASS;
   private string $DB_NAME;
   private ?PDO $connection = null; // Nullable PDO type
-  private static ?DB $instance = null; // Singleton instance
 
   /**
    * Initializes database parameters from environment variables.
    */
-  private function __construct()
+  public function __construct()
   {
     // Fetch environment variables
     $this->DB_HOST = $_ENV["DB_HOST"];
     $this->DB_USER = $_ENV["DB_USER"];
     $this->DB_PASS = $_ENV["DB_PASS"];
     $this->DB_NAME = $_ENV["DB_NAME"];
-  }
-
-  /**
-   * Gets the singleton instance of the DB class.
-   *
-   * @return DB The singleton instance of the DB class.
-   */
-  public static function getInstance(): DB
-  {
-    if (self::$instance === null) {
-      self::$instance = new DB();
-    }
-    return self::$instance;
   }
 
   /**
@@ -81,4 +62,7 @@ class DB
   {
     $this->connection = null;
   }
+
+
+  
 }
