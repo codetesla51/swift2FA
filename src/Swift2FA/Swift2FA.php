@@ -54,7 +54,6 @@ declare(strict_types=1);
 namespace Swift2FA;
 use ParagonIE\ConstantTime\Encoding;
 use chillerlan\QRCode\{QRCode, QROptions};
-require "../../config.php";
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 class Swift2FA
