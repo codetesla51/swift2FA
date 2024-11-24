@@ -4,7 +4,7 @@ $result = null;
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $email = $_POST["email"];
   $pass = $_POST["pass"];
-  $connect = new AuthUser($email, $pass);
+  $connect = new AuthUser($email, $pass, "");
   $result = $connect->loginUser();
 }
 ?>
@@ -38,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       </div>";
         }
         ?>
+        
     <header>Login</header>
     <input type="text" name="email" id="email" placeholder="enter email" required>
     <br>

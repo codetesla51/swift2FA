@@ -17,6 +17,7 @@ body {
     @extend %flx-style;
     justify-content: center;
     min-height: 100vh;
+    flex-direction: column;
 }
 .form {
     @extend %flx-style;

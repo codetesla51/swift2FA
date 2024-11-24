@@ -54,6 +54,7 @@ declare(strict_types=1);
 namespace Swift2FA;
 use ParagonIE\ConstantTime\Encoding;
 use chillerlan\QRCode\{QRCode, QROptions};
+require "../../config.php";
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 class Swift2FA
@@ -220,7 +221,10 @@ class Swift2FA
         "QR Code generation failed: " . $e->getMessage()
       );
     }
-    return sprintf('<img src="%s" class="qrcode-image" alt="QR Code">', $qrcode);
+    return sprintf(
+      '<img src="%s" class="qrcode-image" alt="QR Code">',
+      $qrcode
+    );
   }
 
   /**
@@ -229,9 +233,9 @@ class Swift2FA
    * @param string $input The input code to verify.
    * @return bool True if the input matches the generated OTP, false otherwise.
    */
-  public function TOTPVerify(string $input, int $userID): bool
+  public function TOTPVerify(string $input, string $secret): bool
   {
-    $TOTP = $this->generateTOTP($userID);
+    $TOTP = $this->generateTOTP($secret);
     return $input === $TOTP;
   }
 
@@ -429,9 +433,9 @@ class Swift2FA
    * @param string $input The input code to verify.
    * @return bool True if the input matches the generated OTP, false otherwise.
    */
-  public function TOTPEmailVerify(string $input, int $userID): bool
+  public function TOTPEmailVerify(string $input, string $secret): bool
   {
-    $TOTP = $this->generateTOTP($userID, $timeStep = 120);
+    $TOTP = $this->generateTOTP($secret, $timeStep = 120);
     return $input === $TOTP;
   }
 }

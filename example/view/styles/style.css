@@ -14,6 +14,7 @@ body {
   background: #0a0a0a;
   justify-content: center;
   min-height: 100vh;
+  flex-direction: column;
 }
 
 .form {
