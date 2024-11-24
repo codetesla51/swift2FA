@@ -86,9 +86,8 @@ This will return an encrypted secret key, which can be safely stored and used fo
 The Base32 encoded key is generated randomly within the ```Swift2FA``` class.
 The encryption is done using AES-256, and the encryption key should be securely stored in an environment variable for security purposes.
 
-<div style="border-left: 4px solid #ffc107; padding: 8px; background-color: #fff3cd;">
-  <strong>Note:</strong> Make sure to handle the encryption key carefully and restrict access to your environment files to only trusted users.
-</div>
+> ### ⚠️ **Note**
+> Make sure to handle the encryption key carefully and restrict access to your environment files to only trusted users.
 
 ### Environment Variable
 Make sure to set the encryption key in your environment file (.env) like so:
