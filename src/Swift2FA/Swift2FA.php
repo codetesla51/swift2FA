@@ -224,12 +224,12 @@ class Swift2FA
   }
 
   /**
-   * Verify the code from the authenticator.
+   * Validate the code from the authenticator.
    *
    * @param string $input The input code to verify.
    * @return bool True if the input matches the generated OTP, false otherwise.
    */
-  public function TOTPVerify(string $input, string $secret): bool
+  public function TOTPValidate(string $input, string $secret): bool
   {
     $TOTP = $this->generateTOTP($secret);
     return $input === $TOTP;
@@ -429,7 +429,7 @@ class Swift2FA
    * @param string $input The input code to verify.
    * @return bool True if the input matches the generated OTP, false otherwise.
    */
-  public function TOTPEmailVerify(string $input, string $secret): bool
+  public function TOTPEmailValidate(string $input, string $secret): bool
   {
     $TOTP = $this->generateTOTP($secret, $timeStep = 120);
     return $input === $TOTP;

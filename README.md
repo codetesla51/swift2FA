@@ -47,13 +47,7 @@ The library offers a smooth process for securing your application and ensuring u
 ## Installation
 
 To install Swift2FA, follow these steps:
-
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/Swift2FA.git
-    ```
-
-2. Install dependencies via Composer:
+1. Install dependencies via Composer:
     ```bash
     composer install
     ```
@@ -64,77 +58,151 @@ To install Swift2FA, follow these steps:
 
 ### Create a new instance of Swift2FA
 ```php
-$s2fa = new S2FA();
+use Swift2FA\Swift2FA
+$variable = new Swift2FA();
 ```
-### Gettong Started
+# Getting Started
 
-**Swift2FA** has multiple methods for implementation of two-factor
-authentication am goin to guid you thorugh well most of them
+To use **Swift2FA**, you need to first encrypt the secret key that will be used for TOTP (Time-based One-Time Password) generation in two-factor authentication. The process involves two steps:
+
+1. **Generate the Secret Key**: The secret key is a random Base32 encoded value.
+2. **Encrypt the Secret Key**: This Base32 encoded key is then encrypted using AES-256 with an encryption key stored in an environment variable.
+
+## Encrypting a Key
+
+To encrypt a secret key, you can use the following code:
+
+```php
+use Swift2FA\Swift2FA;
+// Initialize the Swift2FA class
+$variable = new Swift2FA();
+// Encrypt the generated Base32 key
+$encryptedKey = $variable->encryptKey();
+```
+This will return an encrypted secret key, which can be safely stored and used for TOTP generation.
+
+**Note**
+
+The Base32 encoded key is generated randomly within the ```Swift2FA``` class.
+The encryption is done using AES-256, and the encryption key should be securely stored in an environment variable for security purposes.
+
+<div style="border-left: 4px solid #ffc107; padding: 8px; background-color: #fff3cd;">
+  <strong>Note:</strong> Make sure to handle the encryption key carefully and restrict access to your environment files to only trusted users.
+</div>
+
+### Environment Variable
+Make sure to set the encryption key in your environment file (.env) like so:
+```
+ENCRYPTION_KEY=your-secure-encryption-key
+```
+The Swift2FA class will automatically access the ENCRYPTION_KEY environment variable during the encryption process. You do not need to manually retrieve it in your code.
+### Example Workflow
+1. Generate a random Base32 encoded secret key.
+2. Encrypt the key using Swift2FA and an AES-256 encryption method.
+3. Store the encrypted key securely.
+---
+
+### Decrypting Keys
+Decrypting the secret key first is crucial before generating the TOTP. The encrypted secret key needs to be decrypted using the appropriate encryption key.
+
+```php
+use Swift2FA\Swift2FA;
+
+// Initialize the Swift2FA instance
+$variable = new Swift2FA();
+
+// Decrypt the encrypted key
+$decryptKey = $variable->decryptKey($encryptedKey);
+```
+The decryptKey method takes an argument of the encrypted data and will decrypt the encrypted data using the encryption key.
+###$ Key Points:
+  - decryptKey($encryptedKey): This method decrypts the encrypted secret key using the encryption key within the class.
+
+  - The decrypted key can then be used for generating the TOTP.
+---------------------------------------------------------------
 
 ### Generating TOTP
+Generating TOTP (Time-based One-Time Password) can be done in **Swift2FA** using the `generateTOTP` method. The TOTP uses the HMAC algorithm to generate a code that is only valid for a specific period of time. 
+The time step (the validity duration of the code) and the length of the code are arguments that can be passed, but they are set to default values.
 
-Generating TOTP (Time-based One-Time Password) is one of the key features of `Swift2FA`. The generated code uses the HMAC algorithm and is based on a user's secret. This means the code will always be the same across any Authenticator app as long as the secret remains the same.
-
-**How to Use**
+#### Default Values:
+- **$timeStep** = 30 seconds
+- **$codeLength** = 6 digit
+These are the standard settings for most authenticator apps.
+### Example Code:
 
 ```php
-$s2fa = new S2FA();
-$s2fa->generateTOTP($userID);
+use Swift2FA\Swift2FA;
+
+// Initialize the Swift2FA instance
+$variable = new Swift2FA();
+
+// Generate TOTP code using the secret key
+$TotpCode = $variable->generateTOTP($secret);
 ```
-The `generateTOTP` method accepts the following parameters:
+This will return a TOTP code that will be the same on the authenticator app, provided the same time step is used.
 
-- **`$userId`** *(int)*: The unique identifier for the user. This is used to retrieve the user's secret, which is necessary for generating the TOTP.
-- **`$timeStep`** *(int, optional, default = 30)*: The time interval in seconds for which the TOTP remains valid. The default value is 30 seconds, meaning the code will change every 30 seconds. You can increase this value for longer expiration times (e.g., for email-based OTP).
-- **`$codeLength`** *(int, optional, default = 6)*: The number of digits in the generated TOTP. The default value is 6, but you can adjust it to meet your security requirements.
+### Key Points:
+   - HMAC Algorithm: TOTP uses the HMAC algorithm to generate the time-based code.
+   - Time Step: The period during which the code remains valid, defaulted to 30 seconds.
+   - Code Length: The length of the generated code, defaulted to 6 digits.
+---------------------------------------------------------------
+### Generating QR Code
+This method generates a scannable QR code for authenticator apps. This QR code takes arguments of the user's email (which is the user's email) and the secret (which will be used by the authenticator app to generate TOTP). It returns a QR image.
 
-The method returns a **string**, which is the generated TOTP code.
-
-### Example Usage
-
-Here's an example of how you might use the `generateTOTP` method:
-
-```php
-// Create a new instance of the S2FA class
-$s2fa = new S2FA();
-// Generate a 6-digit TOTP for user with ID 12345, valid for 30 seconds
-$totpCode = $s2fa->generateTOTP(12345);
-// Output the generated TOTP code
-echo "Your TOTP code is: " . $totpCode;
+An app name is also required, and **Swift2FA** fetches it from the environment `.env` file. Make sure to set it:
+```
+APP_NAME=swift2fa_app
 ```
 
-### Inserting Encrypted Secret Key to DB
+The generated QR image can be styled with a default CSS class:
+```
+qrcode-image
+```
 
-With **Swift2FA**, you can store the generated secret securely in the database using a specific method. This method ensures that the secret key is encrypted before being stored.
+### Arguments:
+- `$email`: The user's email address.
+- `$secret`: The user's decrypted secret.
+- `$appName`: The application name, fetched from the environment.
 
-### Method Parameters:
-
-- **`$column`**: The column name where the secret will be stored in the database. Default is `secret_key`.
-- **`$table`**: The name of the table where the secret will be inserted. Default is `users`.
-- **`$user_id`**: The unique user ID to associate the secret with.
-
-### Method Return:
-
-This method returns a **boolean** value:
-- **`true`** if the secret was successfully inserted.
-- **`false`** if there was an error during insertion.
-
-### Example Usage:
+### Example Code:
 
 ```php
-// Create an instance of the Swift2FA class
-$s2fa = new S2FA();
+use Swift2FA\Swift2FA;
 
-// Define the column, table, and user ID
-$column = 'secret_key';
-$table = 'users';
-$user_id = 12345;
+// Initialize the Swift2FA instance
+$variable = new Swift2FA();
 
-// Insert the encrypted secret into the database
-$success = $s2fa->insertSecret($column, $table, $user_id);
+// User's email and decrypted secret
+$email = 'user_email@example.com'; // Replace with the actual user email
+$secret = 'user_decrypted_secret'; // Replace with the decrypted secret
 
-// Check if the operation was successful
-if ($success) {
-    echo "Secret key successfully inserted and encrypted.";
-} else {
-    echo "Error inserting the secret key.";
-}
+// Generate QR code using the user's email and secret
+$Qr = $variable->generateQR($email, $secret);
+```
+
+---------------------------------------------------------------
+### Validating TOTP
+**Swift2FA** comes with an additional method for validating the TOTP code generated by the authenticator. This method compares the code generated with the secret key to check if it matches the one on the authenticator app.
+
+### Arguments:
+- **$input**: The code entered by the user (the input code).
+- **$secretKey**: The secret key used to generate the TOTP. This is compared with the code provided.
+
+The method returns a boolean value, indicating whether the validation was successful.
+
+### Example Code:
+
+```php
+use Swift2FA\Swift2FA;
+
+// Initialize the Swift2FA instance
+$variable = new Swift2FA();
+
+// Validate the TOTP code entered by the user
+$isValid = $variable->TOTPValidate($input, $secret);
+```
+### Key Points:
+   -  The method compares the code entered by the user with the one generated using the secret key.
+   - The result is a boolean value, true if the code matches, and false otherwise.
+---------------------------------------------------------------
