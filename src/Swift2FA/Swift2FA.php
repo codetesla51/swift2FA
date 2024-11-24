@@ -141,7 +141,7 @@ class Swift2FA
     $encryptedSecret = openssl_encrypt(
       $this->secretKey,
       $cipherMethod,
-      base64_decode($this->encryptionKey), // Use the fixed encryption key
+      base64_decode($this->encryptionKey),
       0,
       $iv
     );
@@ -175,7 +175,6 @@ class Swift2FA
     // Define the cipher method
     $cipherMethod = "AES-256-CBC";
 
-    // Attempt to decrypt the data
     $decrypted = openssl_decrypt(
       $encryptedSecret,
       $cipherMethod,
@@ -184,14 +183,12 @@ class Swift2FA
       $iv
     );
 
-    // Check if decryption was successful
     if ($decrypted === false) {
       throw new \RuntimeException(
         "Decryption failed. The provided data may be corrupted or the decryption key is incorrect."
       );
     }
 
-    // Return the decrypted secret
     return $decrypted;
   }
 
