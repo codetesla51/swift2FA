@@ -41,7 +41,7 @@
     },
     "authors": [
         {
-            "name": "uthman dev",
+            "name": "uthmandev",
             "email": "uoladele99@gmail.com",
             "homepage": "https://github.com/codetesla51",
             "role": "Developer"
@@ -53,5 +53,4 @@
         "optimize-autoloader": true,
         "sort-packages": true
     }
-
 }

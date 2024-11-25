@@ -54,7 +54,7 @@ The library offers a smooth process for securing your application and ensuring u
 To install Swift2FA, follow these steps:
 1. Install dependencies via Composer:
     ```bash
-    composer install
+  composer require uthmandev/swift2fa
     ```
 
 ---
