@@ -178,8 +178,8 @@ use Swift2FA\Swift2FA;
 $variable = new Swift2FA();
 
 // User's email and decrypted secret
-$email = 'user_email@example.com'; // Replace with the actual user email
-$secret = 'user_decrypted_secret'; // Replace with the decrypted secret
+$email = 'user_email@example.com';
+$secret = 'user_decrypted_secret';
 
 // Generate QR code using the user's email and secret
 $Qr = $variable->generateQR($email, $secret);
