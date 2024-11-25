@@ -232,7 +232,7 @@ class Swift2FA
    */
   public function TOTPValidate(string $input, string $secret): bool
   {
-    $TOTP = $this->generateTOTP($secret, 130);
+    $TOTP = $this->generateTOTP($secret);
     return $input === $TOTP;
   }
 
