@@ -8,7 +8,8 @@
         "chillerlan/php-qrcode": "dev-main",
         "paragonie/constant_time_encoding": "dev-master",
         "spomky-labs/otphp": "^7.0",
-        "phpmailer/phpmailer": "dev-master"
+        "phpmailer/phpmailer": "dev-master",
+        "twilio/sdk": "dev-main"
     },
     "license": "MIT",
     "autoload": {

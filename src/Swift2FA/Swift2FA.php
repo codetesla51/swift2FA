@@ -56,6 +56,8 @@ use ParagonIE\ConstantTime\Encoding;
 use chillerlan\QRCode\{QRCode, QROptions};
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use Twilio\Exceptions\ConfigurationException;
+use Twilio\Rest\Client;
 class Swift2FA
 {
   private string $secretKey;
@@ -306,6 +308,8 @@ class Swift2FA
    * @param string $subject Mail subject | Optional
    * @param string $message Email message
    * @return bool true | false
+   *
+   * Note: This feature is not available yet as it hasn't been tested.
    */
   private function SendGridSetup(
     string $email,
@@ -333,10 +337,10 @@ class Swift2FA
         throw new \RuntimeException("SendGrid Error: " . $response->body());
       }
     } catch (\Exception $e) {
+      // If there's an error, throw an exception with a detailed message
       throw new \RuntimeException("SendGrid Error: " . $e->getMessage());
     }
   }
-
   /**
    * Send TOTP to email using SendGrid
    *
@@ -345,6 +349,8 @@ class Swift2FA
    * @param string $subject Mail subject | Optional
    * @param string $message Email message
    * @return bool true | false
+   *
+   * Note: This feature is not available yet as it hasn't been tested.
    */
   public function SendGridMail(
     string $email,
@@ -353,12 +359,14 @@ class Swift2FA
     string $subject = null
   ): bool {
     try {
+      // This function utilizes sendgridSetup to send an email
+      // Currently, the functionality hasn't been tested
       return $this->sendgridSetup($email, $message, $name, $subject);
     } catch (\Exception $e) {
+      // If there's an error, throw an exception with a detailed message
       throw new \RuntimeException("Error sending email: " . $e->getMessage());
     }
   }
-
   /**
    * Configure Twilio SMS
    * @param string $phoneNumber User's phoneNumber
@@ -367,9 +375,9 @@ class Swift2FA
    * 
 ?   * @return bool true | false
    */
-  private function twilioSetup(
+  public function twilioSetup(
     string $phoneNumber,
-    string $message,
+    string $messageBody, // Clearer parameter name
     string $name
   ): bool {
     try {
@@ -377,17 +385,23 @@ class Swift2FA
       $token = $_ENV["TWILIO_AUTH_TOKEN"];
       $twilioPhoneNumber = $_ENV["TWILIO_PHONE_NUMBER"];
       $twilio = new \Twilio\Rest\Client($sid, $token);
-      $message = $twilio->messages->create($phoneNumber, [
-        "from" => $twilioPhoneNumber,
-        "body" => $message,
-      ]);
 
-      if ($message->sid) {
+      // Send the SMS
+      $sentMessage =
+        $twilio->messag >
+        es->create($phoneNumber, [
+          "from" => $twilioPhoneNumber,
+          "body" => $messageBody,
+        ]);
+
+      // Check if the message was sent successfully
+      if ($sentMessage->sid) {
         return true;
       } else {
         throw new \RuntimeException("Failed to send SMS");
       }
     } catch (\Exception $e) {
+      // Proper error handling with detailed message
       throw new \RuntimeException("Twilio Error: " . $e->getMessage());
     }
   }
@@ -411,11 +425,9 @@ class Swift2FA
     string $name,
     string $subject = null
   ): bool {
-    $types = ["SMTP", "SendGrid"];
+    $types = ["SMTP"];
     if (in_array($mailType, $types)) {
-      if ($mailType == "SendGrid") {
-        return $this->SendGridMail($email, $message, $name, $subject);
-      } elseif ($mailType == "SMTP") {
+      if ($mailType == "SMTP") {
         return $this->PHPMailer($email, $message, $name, $subject);
       }
     }
@@ -434,4 +446,3 @@ class Swift2FA
     return $input === $TOTP;
   }
 }
-$test = new Swift2FA();
