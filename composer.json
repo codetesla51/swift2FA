@@ -18,13 +18,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.0",
-        "endroid/qr-code": "^6.0@dev",
+        "vlucas/phpdotenv": "^5.0",
         "chillerlan/php-qrcode": "dev-main",
         "paragonie/constant_time_encoding": "dev-master",
-        "spomky-labs/otphp": "^7.0",
         "phpmailer/phpmailer": "dev-master",
-        "twilio/sdk": "dev-main",
-        "vlucas/phpdotenv": "^5.0"
+        "twilio/sdk": "dev-main"
     },
     "require-dev": {
         "phpunit/phpunit": "^12.0@dev"
@@ -47,6 +45,8 @@
             "role": "Developer"
         }
     ],
+    "minimum-stability": "dev",
+    "prefer-stable": false,
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true
