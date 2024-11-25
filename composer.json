@@ -1,5 +1,5 @@
 {
-    "name": "Swift2FA",
+    "name": "uthmandev/swift2fa", 
     "description": "A secure and easy way to implement Two-Factor Authentication (2FA) with PHP. This library provides an easy-to-use solution for integrating 2FA into your applications, including QR code generation, token verification, and secret key management.",
     "type": "library",
     "require": {
@@ -13,7 +13,12 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Swift2FA\\": "src/S2FA"
+            "Swift2FA\\": "src/Swift2FA/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Swift2FA\\tests\\": "tests/"
         }
     },
     "authors": [

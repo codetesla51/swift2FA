@@ -76,7 +76,6 @@ class Swift2FA
     } else {
       $this->secretKey = $secretKey; // Use the provided secret key
     }
-
     // Ensure the encryption key is securely fetched from environment variables
     if (isset($_ENV["ENCRYPTION_KEY"])) {
       $this->encryptionKey = $_ENV["ENCRYPTION_KEY"];
@@ -231,7 +230,7 @@ class Swift2FA
    */
   public function TOTPValidate(string $input, string $secret): bool
   {
-    $TOTP = $this->generateTOTP($secret);
+    $TOTP = $this->generateTOTP($secret, 130);
     return $input === $TOTP;
   }
 
@@ -431,7 +430,8 @@ class Swift2FA
    */
   public function TOTPEmailValidate(string $input, string $secret): bool
   {
-    $TOTP = $this->generateTOTP($secret, $timeStep = 120);
+    $TOTP = $this->generateTOTP($secret);
     return $input === $TOTP;
   }
 }
+$test = new Swift2FA();
