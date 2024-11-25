@@ -17,7 +17,7 @@
     },
     "license": "MIT",
     "require": {
-        "php": "^8.0",
+        "php": "^7.4 || ^8.0",
         "vlucas/phpdotenv": "^5.0",
         "chillerlan/php-qrcode": "dev-main",
         "paragonie/constant_time_encoding": "dev-master",
@@ -37,7 +37,7 @@
             "Swift2FA\\tests\\": "tests/"
         }
     },
-    
+
     "authors": [
         {
             "name": "uthmandev",
