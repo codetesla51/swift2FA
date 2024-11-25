@@ -23,7 +23,8 @@
         "paragonie/constant_time_encoding": "dev-master",
         "spomky-labs/otphp": "^7.0",
         "phpmailer/phpmailer": "dev-master",
-        "twilio/sdk": "dev-main"
+        "twilio/sdk": "dev-main",
+        "vlucas/phpdotenv": "^5.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^12.0@dev"
@@ -46,8 +47,6 @@
             "role": "Developer"
         }
     ],
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true
