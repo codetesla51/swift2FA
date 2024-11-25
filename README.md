@@ -209,6 +209,31 @@ $isValid = $variable->TOTPValidate($input, $secret);
 ### Key Points:
    -  The method compares the code entered by the user with the one generated using the secret key.
    - The result is a boolean value, true if the code matches, and false otherwise.
+
+ > ### ⚠️ **Note**
+> Validating TOTP sent through email will require a longer time step. Using this
+```TOTPValidate``` Method  will use a time step of 30, which is 30 seconds. For email-sent
+TOTP, use this way:
+
+```php
+use Swift2FA\Swift2FA;
+
+// Initialize the Swift2FA instance
+$variable = new Swift2FA();
+$timeStep = 120; // two minutes
+$secret = $user_secret;
+$input = 1244;
+
+// Generate TOTP
+$totpCode = $variable->generateTOTP($secret, $timeStep);
+
+// Check if input and generated code are the same
+if ($input === $totpCode) {
+    // Valid code, proceed
+} else {
+    // Invalid code
+}
+```
 ---------------------------------------------------------------
 
 ### Sending TOTP as Email or SMS
@@ -291,6 +316,7 @@ $name = 'Recipient Name';  // Recipient's name
 // Send the SMS using the Swift2FA method
 $swift2FA->SMS($phoneNumber, $messageBody, $name);
 ```
+---
 
 ## Contributing
 
