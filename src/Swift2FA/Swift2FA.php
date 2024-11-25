@@ -375,9 +375,9 @@ class Swift2FA
    * 
 ?   * @return bool true | false
    */
-  public function twilioSetup(
+  public function twilio(
     string $phoneNumber,
-    string $messageBody, // Clearer parameter name
+    string $messageBody,
     string $name
   ): bool {
     try {

@@ -1,8 +1,23 @@
 {
-    "name": "uthmandev/swift2fa", 
+    "name": "uthmandev/swift2fa",
     "description": "A secure and easy way to implement Two-Factor Authentication (2FA) with PHP. This library provides an easy-to-use solution for integrating 2FA into your applications, including QR code generation, token verification, and secret key management.",
     "type": "library",
+    "keywords": [
+        "2FA",
+        "Two-Factor Authentication",
+        "PHP",
+        "QR Code",
+        "Token Verification",
+        "Security",
+        "Authentication"
+    ],
+    "homepage": "https://github.com/codetesla51/swift2FA",
+    "support": {
+        "source": "https://github.com/codetesla51/swift2FA"
+    },
+    "license": "MIT",
     "require": {
+        "php": "^8.0",
         "vlucas/phpdotenv": "5.6.x-dev",
         "endroid/qr-code": "^6.0@dev",
         "chillerlan/php-qrcode": "dev-main",
@@ -11,7 +26,9 @@
         "phpmailer/phpmailer": "dev-master",
         "twilio/sdk": "dev-main"
     },
-    "license": "MIT",
+    "require-dev": {
+        "phpunit/phpunit": "^12.0@dev"
+    },
     "autoload": {
         "psr-4": {
             "Swift2FA\\": "src/Swift2FA/"
@@ -24,11 +41,17 @@
     },
     "authors": [
         {
-            "name": "uthman dev"
+            "name": "uthman dev",
+            "email": "uoladele99@gmail.com",
+            "homepage": "https://github.com/codetesla51",
+            "role": "Developer"
         }
     ],
     "minimum-stability": "dev",
-    "require-dev": {
-        "phpunit/phpunit": "^12.0@dev"
+    "prefer-stable": true,
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
     }
+
 }
