@@ -52,7 +52,6 @@
  */
 declare(strict_types=1);
 namespace Swift2FA;
-require "../../config.php";
 use ParagonIE\ConstantTime\Encoding;
 use chillerlan\QRCode\{QRCode, QROptions};
 use PHPMailer\PHPMailer\PHPMailer;
@@ -240,7 +239,7 @@ class Swift2FA
       throw new \RuntimeException(
         "Application name (APP_NAME) is not set in the environment variables."
       );
-  }
+    }
 
     return "otpauth://totp/{$APP_NAME}:{$email}?secret={$secret}&issuer={$APP_NAME}";
   }
@@ -467,7 +466,3 @@ class Swift2FA
     return $input === $TOTP;
   }
 }
-$test = new Swift2FA();
-$email = "uoladele99@gmail.com";
-$secret = "s4q2owdldtijflnjeau5ag2vf7bzqsfzazqby32jsahjgsytmgfa====";
-var_dump($test->generatelink($email, $secret));
