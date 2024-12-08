@@ -3,7 +3,7 @@
 # SWIFT2FA
 **Easy and Secure 2-Factor Authentication**
 
-<img src="https://img.shields.io/badge/version-v1.0.0-blue" alt="Version">
+<img src="https://img.shields.io/github/v/release/codetesla51/swift2FA" alt="Latest Release">
 <img src="https://img.shields.io/badge/tests-passed-brightgreen" alt="Tests Passed">
 <img src="https://img.shields.io/github/license/codetesla51/swift2FA" alt="License">
 
