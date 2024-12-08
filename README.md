@@ -197,12 +197,6 @@ Once a user scans the QR code, a TOTP (Time-based One-Time Password) link is gen
 >  
 > The **best method** for adding TOTP to your authenticator apps is by scanning the QR code, as most authenticator apps are designed to work with QR codes.
 
-<style>
-blockquote {
-  border-left: 2px solid #008afa;
-  padding-left: 10px;
-}
-</style>
 
 ---
 
