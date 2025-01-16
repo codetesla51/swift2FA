@@ -466,7 +466,3 @@ class Swift2FA
     return $input === $TOTP;
   }
 }
-$test = new Swift2FA();
-$email = "uoladele99@gmail.com";
-$secret = "s4q2owdldtijflnjeau5ag2vf7bzqsfzazqby32jsahjgsytmgfa====";
-var_dump($test->generatelink($email, $secret));
