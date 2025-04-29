@@ -407,12 +407,10 @@ class Swift2FA
       $twilio = new \Twilio\Rest\Client($sid, $token);
 
       // Send the SMS
-      $sentMessage =
-        $twilio->messag >
-        es->create($phoneNumber, [
+         $sentMessage = $twilio->messages->create($phoneNumber, [
           "from" => $twilioPhoneNumber,
           "body" => $messageBody,
-        ]);
+      ]);
 
       // Check if the message was sent successfully
       if ($sentMessage->sid) {
