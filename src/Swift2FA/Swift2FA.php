@@ -87,10 +87,17 @@ class Swift2FA
       );
     }
   }
-  public function GetSecreteKey(): string
+  
+  /**
+   * Get the secret key.
+   * 
+   * @return string The secret key.
+   */
+  public function getSecretKey(): string
   {
     return $this->secretKey;
   }
+  
   /**
    * Generate a secure OTP using the current time and the secret key.
    *
@@ -231,7 +238,7 @@ class Swift2FA
    * @return string The TOTP URI formatted string for use in authentication apps.
    * @throws \RuntimeException If the application name (APP_NAME) is not set in the environment variables.
    */
-  public function generatelink(string $email, string $secret): string
+  public function generateLink(string $email, string $secret): string
   {
     // Get the application name from environment variables
     $APP_NAME = $_ENV["APP_NAME"] ?? null;
@@ -239,7 +246,7 @@ class Swift2FA
       throw new \RuntimeException(
         "Application name (APP_NAME) is not set in the environment variables."
       );
-  }
+    }
 
     return "otpauth://totp/{$APP_NAME}:{$email}?secret={$secret}&issuer={$APP_NAME}";
   }
@@ -250,7 +257,7 @@ class Swift2FA
    * @param string $input The input code to verify.
    * @return bool True if the input matches the generated OTP, false otherwise.
    */
-  public function TOTPValidate(string $input, string $secret): bool
+  public function totpValidate(string $input, string $secret): bool
   {
     $TOTP = $this->generateTOTP($secret);
     return $input === $TOTP;
@@ -266,7 +273,7 @@ class Swift2FA
    * @return bool true | false
    */
 
-  private function PHPMailerSetup(
+  private function phpMailerSetup(
     string $email,
     string $message,
     string $name,
@@ -307,14 +314,14 @@ class Swift2FA
    * @return bool true | false
    */
 
-  public function PHPMailer(
+  public function phpMailer(
     string $email,
     string $message,
     string $name,
     string $subject = null
   ): bool {
     try {
-      return $this->PHPMailerSetup($email, $message, $name, $subject);
+      return $this->phpMailerSetup($email, $message, $name, $subject);
     } catch (\Exception $e) {
       throw new \RuntimeException("Error sending email: " . $e->getMessage());
     }
@@ -331,7 +338,7 @@ class Swift2FA
    *
    * Note: This feature is not available yet as it hasn't been tested.
    */
-  private function SendGridSetup(
+  private function sendGridSetup(
     string $email,
     string $message,
     string $name,
@@ -361,39 +368,14 @@ class Swift2FA
       throw new \RuntimeException("SendGrid Error: " . $e->getMessage());
     }
   }
-  /**
-   * Send TOTP to email using SendGrid
-   *
-   * @param string $email User's email
-   * @param string $name User's name
-   * @param string $subject Mail subject | Optional
-   * @param string $message Email message
-   * @return bool true | false
-   *
-   * Note: This feature is not available yet as it hasn't been tested.
-   */
-  public function SendGridMail(
-    string $email,
-    string $message,
-    string $name,
-    string $subject = null
-  ): bool {
-    try {
-      // This function utilizes sendgridSetup to send an email
-      // Currently, the functionality hasn't been tested
-      return $this->sendgridSetup($email, $message, $name, $subject);
-    } catch (\Exception $e) {
-      // If there's an error, throw an exception with a detailed message
-      throw new \RuntimeException("Error sending email: " . $e->getMessage());
-    }
-  }
+  
   /**
    * Configure Twilio SMS
    * @param string $phoneNumber User's phoneNumber
    * @param string $message SMS message
    * @param string $name User name
    * 
-?   * @return bool true | false
+   * @return bool true | false
    */
   public function twilio(
     string $phoneNumber,
@@ -404,10 +386,10 @@ class Swift2FA
       $sid = $_ENV["TWILIO_SID"];
       $token = $_ENV["TWILIO_AUTH_TOKEN"];
       $twilioPhoneNumber = $_ENV["TWILIO_PHONE_NUMBER"];
-      $twilio = new \Twilio\Rest\Client($sid, $token);
+      $twilio = new Client($sid, $token);
 
       // Send the SMS
-         $sentMessage = $twilio->messages->create($phoneNumber, [
+      $sentMessage = $twilio->messages->create($phoneNumber, [
           "from" => $twilioPhoneNumber,
           "body" => $messageBody,
       ]);
@@ -436,7 +418,7 @@ class Swift2FA
    * @return bool true if the email was sent successfully, false otherwise.
    * @throws \InvalidArgumentException if an invalid mail type is provided.
    */
-  public function Mail(
+  public function mail(
     string $mailType,
     string $email,
     string $message,
@@ -446,7 +428,7 @@ class Swift2FA
     $types = ["SMTP"];
     if (in_array($mailType, $types)) {
       if ($mailType == "SMTP") {
-        return $this->PHPMailer($email, $message, $name, $subject);
+        return $this->phpMailer($email, $message, $name, $subject);
       }
     }
     throw new \InvalidArgumentException("Invalid mail type: " . $mailType);
@@ -458,7 +440,7 @@ class Swift2FA
    * @param string $input The input code to verify.
    * @return bool True if the input matches the generated OTP, false otherwise.
    */
-  public function TOTPEmailValidate(string $input, string $secret): bool
+  public function totpEmailValidate(string $input, string $secret): bool
   {
     $TOTP = $this->generateTOTP($secret);
     return $input === $TOTP;
